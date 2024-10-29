@@ -1,7 +1,7 @@
 #include <Wire.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
-
+#include <Adafruit_BMP280.h>
 
 #define OLED_ADDR   0x3C
 #define HYT221_ADDR 0x28
@@ -11,10 +11,10 @@
 #define TEMP_SCALE 165.0
 #define HUM_SCALE 100.0
 
-#define HYT_DEBUG 1
+//#define HYT_DEBUG 1
 // https://forum.arduino.cc/t/hyt-221-from-hygrosens-instruments/54560/5
 
-
+Adafruit_BMP280 bmp;
 
 class HYT221 {
     private:
@@ -168,18 +168,34 @@ void setup() {
   
   display.setCursor(0,16);
   display.print("HYT: "); display.println(have_hyt);
-  display.display();
+  display.setCursor(0,24);
+  if (bmp.begin(0x76),88) {
+    display.print("BMP280: OK");
+    bmp.setSampling(Adafruit_BMP280::MODE_NORMAL,     /* Operating Mode. */
+                  Adafruit_BMP280::SAMPLING_X2,     /* Temp. oversampling */
+                  Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
+                  Adafruit_BMP280::FILTER_X16,      /* Filtering. */
+                  Adafruit_BMP280::STANDBY_MS_500); /* Standby time. */
+    Serial.println(bmp.sensorID(),16);
 
+  } else {
+    display.print("BMP280 NOT FOUND");
+  }
+  display.display();
+  delay(1000);
 }
 
 
 void loop(){
   Serial.println("loop!");
- 
+  Serial.println(bmp.sensorID(),16);
+  Serial.println(bmp.getStatus());
+  Serial.println(bmp.readTemperature());
    hyt.read();
    Serial.println("finished read");
    double h = hyt.getHumidity();
    double t = hyt.getTemperature();
+   double p = bmp.readPressure();
    int hraw =  hyt.getRawHumidity() ;
    int traw =  hyt.getRawTemperature() ;
    Serial.print(t);
@@ -189,13 +205,17 @@ void loop(){
    Serial.print(h);
    Serial.print(" %, ");
    Serial.println(hraw);
+   Serial.print("pressure");
+   Serial.println(p);
+
   display.clearDisplay();
   display.setCursor(0,0);
   display.print(t); display.print(" C / ");
   
   display.setCursor(0,12);
   display.print(h); display.print(" %rF / ");
-  
+  display.setCursor(0,24);
+  display.print(p);
   
   display.display();
    delay(3000);
