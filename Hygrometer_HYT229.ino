@@ -174,7 +174,7 @@ void setup() {
     bmp.setSampling(Adafruit_BMP280::MODE_NORMAL,     /* Operating Mode. */
                   Adafruit_BMP280::SAMPLING_X2,     /* Temp. oversampling */
                   Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
-                  Adafruit_BMP280::FILTER_X16,      /* Filtering. */
+                  Adafruit_BMP280::FILTER_X8,      /* Filtering. use FILTER_X2 or FILTER_X16 */
                   Adafruit_BMP280::STANDBY_MS_500); /* Standby time. */
     Serial.println(bmp.sensorID(),16);
 
@@ -198,6 +198,7 @@ void loop(){
    double p = bmp.readPressure();
    int hraw =  hyt.getRawHumidity() ;
    int traw =  hyt.getRawTemperature() ;
+   float alt = bmp.readAltitude();
    Serial.print(t);
    Serial.print(" C, ");
    Serial.print(traw);
@@ -205,7 +206,7 @@ void loop(){
    Serial.print(h);
    Serial.print(" %, ");
    Serial.println(hraw);
-   Serial.print("pressure");
+   Serial.print("pressure: ");
    Serial.println(p);
 
   display.clearDisplay();
@@ -215,7 +216,10 @@ void loop(){
   display.setCursor(0,12);
   display.print(h); display.print(" %rF / ");
   display.setCursor(0,24);
-  display.print(p);
+  display.print(p );
+  display.print(" Pa / ");
+  display.print(alt);
+  display.print("m");
   
   display.display();
    delay(3000);
