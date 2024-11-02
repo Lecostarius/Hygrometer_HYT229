@@ -20,7 +20,7 @@ A third option is a traditional Arduino nano, which is by and large the smallest
 mC boards. However, this needs 7V input (2 S LiPoly). Current consumption is said to be 20 mA.
 
 After some measurements and experiments, I settled for the Pico2. The reason is that it offers twice the
-amount of Flash (4 MB instead of 2 MB) and I can create a data logging function more easily with that.
+amount of Flash (4 MB instead of 2 MB) compared to the Pico, and I can create a data logging function more easily with that.
 Also, in my measurements, the Pico2 is not more power hungry than the Pico; I can get along with something
 in the order of 25 mA current consumption if driven by a single LiPo cell of 4 V, which is really low and
 should allow me battery life times of 2-4 days when using a 2000 mAh LiPo.  
@@ -50,6 +50,6 @@ the Pico my favorite.
 Because of limited space, I plan to use a single button for user interface. Currently, I can only think of one
 function for the UI, namely: start logging. But maybe there could be different modes (focus on humidity, focus
 on barometric pressure or height...), and also, I would really need a real time clock to make sense of my
-logging data.
+logging data, and a clock would need to be set, which requires a UI.
 
 
