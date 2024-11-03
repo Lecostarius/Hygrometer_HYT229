@@ -52,4 +52,15 @@ function for the UI, namely: start logging. But maybe there could be different m
 on barometric pressure or height...), and also, I would really need a real time clock to make sense of my
 logging data, and a clock would need to be set, which requires a UI.
 
+After the first 3d prints, I found an issue with my layout: the Lipo Shim is adding almost a cm to the thickness
+of the Pico2, which makes it difficult for me to fit above the battery. And, I put the HYT into a hole in the
+wall, where it fits snugly. But that means that the temperature sensor becomes slow - probably because it has
+now great thermal contact to the case, and therefore the entire case needs to warm up or cool down before the HYT
+will see the actual new temperature value. It might be better to glue the HYT into a large hole with space around
+it, so that it keeps most of its speed.
+
+The Lipo Shim has a white LED that is always on when the device is on. With my 3d printed PLA, I can see that LED
+from the outside, which looks weird. Either I remove the LED, or print with 100 percent material so that this light
+is somewhat dampened.
+
 
