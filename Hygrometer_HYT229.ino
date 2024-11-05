@@ -2,6 +2,7 @@
 #include <Adafruit_GFX.h>
 #include <Adafruit_SSD1306.h>
 #include <Adafruit_BMP280.h>
+#include <Fonts/FreeSans9pt7b.h>
 
 #define OLED_ADDR   0x3C
 #define HYT221_ADDR 0x28
@@ -137,9 +138,10 @@ HYT221 hyt(HYT221_ADDR);
 
 uint8_t have_hyt = 0;
 uint8_t have_oled = 0;
-
+uint8_t logging = 1;
 
 void setup() {
+  int i;
   int ack;
   Serial.begin(115200);
   Serial.println("Lecostarius");
@@ -159,6 +161,7 @@ void setup() {
   display.begin(SSD1306_SWITCHCAPVCC, OLED_ADDR);
   display.clearDisplay();
   display.setTextColor(WHITE);
+  display.setFont(&FreeSans9pt7b);
   display.setTextSize(1);
   display.setCursor(0, 10);
   display.println("Lecostarius");
@@ -174,13 +177,14 @@ void setup() {
     bmp.setSampling(Adafruit_BMP280::MODE_NORMAL,     /* Operating Mode. */
                   Adafruit_BMP280::SAMPLING_X2,     /* Temp. oversampling */
                   Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
-                  Adafruit_BMP280::FILTER_X8,      /* Filtering. use FILTER_X2 or FILTER_X16 */
+                  Adafruit_BMP280::FILTER_X16,      /* Filtering. use FILTER_X2 or FILTER_X16 */
                   Adafruit_BMP280::STANDBY_MS_500); /* Standby time. */
     Serial.println(bmp.sensorID(),16);
 
   } else {
     display.print("BMP280 NOT FOUND");
   }
+  
   display.display();
   delay(1000);
 }
@@ -210,18 +214,24 @@ void loop(){
    Serial.println(p);
 
   display.clearDisplay();
-  display.setCursor(0,0);
-  display.print(t); display.print(" C / ");
+  display.setCursor(0,15);
+  display.print(0.1 * int(t*10)); display.print("°C/");
   
-  display.setCursor(0,12);
-  display.print(h); display.print(" %rF / ");
-  display.setCursor(0,24);
-  display.print(p );
-  display.print(" Pa / ");
+  
+  display.print(int(h)); display.print(" %rF");
+  display.setCursor(0,31);
+  display.setFont(); // standard font
+  display.print(0.1*int(p/10));
+  display.print(" hPa");
+  display.setFont(&FreeSans9pt7b);
   display.print(alt);
   display.print("m");
+ 
   
   display.display();
+  if (logging) {
+    
+  }
    delay(3000);
 
 }
