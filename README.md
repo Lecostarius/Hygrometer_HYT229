@@ -18,3 +18,49 @@ any battery and the form factor is slightly smaller, 21x51 mm.
 
 A third option is a traditional Arduino nano, which is by and large the smallest form factor of normal
 mC boards. However, this needs 7V input (2 S LiPoly). Current consumption is said to be 20 mA.
+
+After some measurements and experiments, I settled for the Pico2. The reason is that it offers twice the
+amount of Flash (4 MB instead of 2 MB) compared to the Pico, and I can create a data logging function more easily with that.
+Also, in my measurements, the Pico2 is not more power hungry than the Pico; I can get along with something
+in the order of 25 mA current consumption if driven by a single LiPo cell of 4 V, which is really low and
+should allow me battery life times of 2-4 days when using a 2000 mAh LiPo.  
+
+I decided to add a BMP280 barometer, it is very cheap and I can add a nice height-measurement and also
+traditional barometer function to the device. It also uses I2C.
+
+Wiring is easy. I have three external components to the Pico, all share - except the 3.3V and GND - the same
+wires: SDA (I color code it green, Pin 6 of the Pico) and SCL (I color code it yellow, Pin 7 of the Pico).
+The three are the 0.91 inch OLED display (I2C adress 0x3C), the HYT221 sensor itself (I2C adress 0x28) and
+the BMP280, which has I2C adress 0x76. 
+
+The BMP280 is a cheap breakout, but the manual says that the I2C adress is switchable between 0x76 and 0x77.
+However, if I try - and I tried twice with two such boards - the sensor returns only 0.0 after setting the
+I2C adress to 0x77 even once - it seems that applying the 3.3V to the SDO pin kills the sensor. It still
+responds to I2C protocol though, it is just that it gives no data any more. So, I decided to keep adress 0x76
+which is not a problem anyway.
+
+I also purchased a Lipo Shim for the Pico2: https://shop.pimoroni.com/products/pico-lipo-shim, this contains
+a charging circuit for 1S LiPo, which is really nice - it allows me to drive the Hygrometer from battery,
+or from USB directly, and also allows me to recharge the battery using USB.
+
+With the Pico, it is possible to get the logged data out using the USB connector and USB mass storage protocol
+(well, at least, almost). That makes for very easy usage and, along with the capability to run on 1S LiPo, made
+the Pico my favorite.
+
+Because of limited space, I plan to use a single button for user interface. Currently, I can only think of one
+function for the UI, namely: start logging. But maybe there could be different modes (focus on humidity, focus
+on barometric pressure or height...), and also, I would really need a real time clock to make sense of my
+logging data, and a clock would need to be set, which requires a UI.
+
+After the first 3d prints, I found an issue with my layout: the Lipo Shim is adding almost a cm to the thickness
+of the Pico2, which makes it difficult for me to fit above the battery. And, I put the HYT into a hole in the
+wall, where it fits snugly. But that means that the temperature sensor becomes slow - probably because it has
+now great thermal contact to the case, and therefore the entire case needs to warm up or cool down before the HYT
+will see the actual new temperature value. It might be better to glue the HYT into a large hole with space around
+it, so that it keeps most of its speed.
+
+The Lipo Shim has a white LED that is always on when the device is on. With my 3d printed PLA, I can see that LED
+from the outside, which looks weird. Either I remove the LED, or print with 100 percent material so that this light
+is somewhat dampened.
+
+
