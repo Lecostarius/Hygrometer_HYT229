@@ -73,3 +73,5 @@ I used the SingleFileDrive facility of LittleFS to export the logfile to the out
 logging starts, and in this mode, the device switches itself off and awakes every 5 seconds (still consuming the
 abovementioned 7 mA though). The restart process lets the display flicker shortly.
 
+Note: the current code that uses powman and switches off the Pico 2 is in the branch sleep and not in main!
+
