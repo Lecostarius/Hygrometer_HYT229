@@ -33,7 +33,7 @@
 #include "hardware/gpio.h"
 #include "hardware/powman.h"
 
-#define SLEEP_TIME_MS 3000
+#define SLEEP_TIME_MS 5000
 
 void powman_example_init(uint64_t abs_time_ms);
 int powman_example_off_until_gpio_high(int gpio);
@@ -202,6 +202,7 @@ uint8_t logging = 0;
 void setup() {
   int i;
   int ack;
+  int rebooting = 0;  // flag that is 0 if we start fresh, 1 if this is a reboot initiated by powman (a wake up from deep sleep)
 
   set_sys_clock_48mhz();  // run everything from pll_usb pll and stop pll_sys
 
@@ -215,7 +216,7 @@ void setup() {
   singleFileDrive.begin("littlefsfile.txt", "myfile.txt");  // export the real file littlefsfile.txt as myfile.txt
 
   pinMode(TASTERPIN, INPUT_PULLUP);
-  pinMode(29, INPUT);
+  pinMode(29, INPUT); // VSYS, to read battery voltage
 
   // check whether we have all devices on I2C bus:
   Wire.begin();
@@ -233,44 +234,51 @@ void setup() {
 
   hyt.begin();
 
-  display.begin(SSD1306_SWITCHCAPVCC, OLED_ADDR);
+  if (powman_hw->scratch[1] == 31415) rebooting = 1; // are we coming back from deep sleep?
+  if (rebooting) {
+    // this is a reboot, not an initial start. Do not clear screen etc!
+    display.begin(SSD1306_SWITCHCAPVCC, OLED_ADDR, (0 == 1));  // FALSE as third parameter says: no RESET of display
+    powman_hw->scratch[0]++;                                   // "timer"
+    logging = powman_hw->scratch[2];
+    can_write = powman_hw->scratch[3];
+  } else {
+    // first time we come here, initial power-up, not some restart by powman
+    powman_hw->scratch[1] = 31415;  // magic
+    powman_hw->scratch[0] = 0;      // initialize timer, first time we boot after power up
+    powman_hw->scratch[3] = can_write;
+    powman_hw->scratch[2] = logging;
+    display.begin(SSD1306_SWITCHCAPVCC, OLED_ADDR);  // no third parameter says: RESET of display
+    display.clearDisplay();
+  }
+
   display.setTextColor(WHITE);
   display.setFont(&FreeSans9pt7b);
   display.setTextSize(1);
   
+  if (bmp.begin(0x76), 88) {
+    if (!rebooting) {display.setCursor(0, 24); display.print("BMP280: OK");}
+    bmp.setSampling(Adafruit_BMP280::MODE_NORMAL,     /* Operating Mode. */
+                    Adafruit_BMP280::SAMPLING_X2,     /* Temp. oversampling */
+                    Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
+                    Adafruit_BMP280::FILTER_X16,      /* Filtering. use FILTER_X2 or FILTER_X16 */
+                    Adafruit_BMP280::STANDBY_MS_500); /* Standby time. */
+    Serial.print("BMP Sensor ID: "); Serial.println(bmp.sensorID(), 16);
+  }
 
-  if (powman_hw->scratch[1] == 31415) {
-    // this is a reboot, not an initial start. Do not clear screen etc!
-    powman_hw->scratch[0]++;  // "timer"
-    logging = powman_hw->scratch[2];
-    can_write = powman_hw->scratch[3];
-  } else {
-    powman_hw->scratch[1] = 31415;                    // magic
-    powman_hw->scratch[0] = 0;  // initialize timer, first time we boot after power up
-    powman_hw->scratch[3] = can_write;
-    powman_hw->scratch[2] = logging;
-
-    display.clearDisplay();
-  
+  // if this is a cold start, show our splash screen for a second:
+  if (!rebooting) {
     display.setCursor(0, 10);
     display.println("Lecostarius");
 
     display.setCursor(0, 16);
     display.print("HYT: ");
     display.println(have_hyt);
-    display.setCursor(0, 24);
+    
     display.display();
     delay(1000);
   }
-  if (bmp.begin(0x76), 88) {
-    // display.print("BMP280: OK");
-    bmp.setSampling(Adafruit_BMP280::MODE_NORMAL,     /* Operating Mode. */
-                    Adafruit_BMP280::SAMPLING_X2,     /* Temp. oversampling */
-                    Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
-                    Adafruit_BMP280::FILTER_X16,      /* Filtering. use FILTER_X2 or FILTER_X16 */
-                    Adafruit_BMP280::STANDBY_MS_500); /* Standby time. */
-    Serial.println(bmp.sensorID(), 16);
-  }
+
+
 }
 
 // this will return the y pixel coordinate for the battery bar if
@@ -285,8 +293,8 @@ int get_y_pixel(float bat) {
 }
 void loop() {
   float bat = analogRead(29) * 3.0 * 3.3 / 1024.0;  // Spannung an VSYS, also Batteriespannung
- 
-  
+
+
 
   hyt.read();
   Serial.println("finished read");
@@ -296,18 +304,26 @@ void loop() {
   int hraw = hyt.getRawHumidity();
   int traw = hyt.getRawTemperature();
   float alt = bmp.readAltitude();
-  
+
   // three lines of info about sensor data:
-  Serial.print("U bat= "); Serial.println(bat);
-  Serial.print(t);  Serial.print(" C, ");  Serial.print(traw);  Serial.print(" , ");  Serial.print(h);  Serial.print(" %, ");  Serial.println(hraw);
-  Serial.print("pressure: "); Serial.println(p);
+  Serial.print("U bat= ");
+  Serial.println(bat);
+  Serial.print(t);
+  Serial.print(" C, ");
+  Serial.print(traw);
+  Serial.print(" , ");
+  Serial.print(h);
+  Serial.print(" %, ");
+  Serial.println(hraw);
+  Serial.print("pressure: ");
+  Serial.println(p);
 
   if (digitalRead(TASTERPIN) == LOW) {
     logging = 1 - logging;
   }
-  powman_hw->scratch[2] = logging; // keep logging status alive through power cycle
+  powman_hw->scratch[2] = logging;  // keep logging status alive through power cycle
 
-  
+
   // now serve the display:
   display.clearDisplay();
   display.setCursor(0, 15);
@@ -332,25 +348,25 @@ void loop() {
   display.drawPixel(126, get_y_pixel(3.6), 1);
   display.drawPixel(126, get_y_pixel(3.8), 1);
   display.drawPixel(126, get_y_pixel(4.2), 1);
-  
+
   // logging line:
   if (logging) {
     display.drawLine(123, 31, 127, 31, 1);
   }
-  
+
   display.display();
 
   if (logging) {
     if (can_write) {
-      Serial.println("writing");
+      //Serial.println("writing");
       noInterrupts();
       File f = LittleFS.open("littlefsfile.txt", "a");
       if (h >= 99.9) { h = 99.9; }
-      f.printf("%d %5.1f %3.1f %3.1f %4.2f\n", int(millis() / 1000), p, h, t, alt);
+      f.printf("%d %5.1f %3.1f %3.1f %4.2f\n", int((millis() + SLEEP_TIME_MS * powman_hw->scratch[0])/1000), p, h, t, alt);
       f.close();
       interrupts();
     }
-//#define SLEEP
+#define SLEEP
 #ifdef SLEEP
     // go to deep sleep using powman
     // Unlock the VREG control interface
@@ -363,7 +379,7 @@ void loop() {
     //printf("Wake up, test run: %u\n", powman_hw->scratch[0]++);
     // power off
     int rc = powman_example_off_for_ms(SLEEP_TIME_MS);
-    // we should not get here...
+    // we should not get here... instead we re-start the Pico 2
 #else
     delay(SLEEP_TIME_MS);
 #endif
