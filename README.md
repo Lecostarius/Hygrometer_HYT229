@@ -63,4 +63,13 @@ The Lipo Shim has a white LED that is always on when the device is on. With my 3
 from the outside, which looks weird. Either I remove the LED, or print with 100 percent material so that this light
 is somewhat dampened.
 
+After a lot of trying, I could only switch off the Pico 2 and restart it again after 5 seconds time. On an empty
+Pico, that seemed to bring current consumption (on 1S Lipo) to below 1 mA, on my final setup however, which still
+has the display on, the LED of the Shim on, the barometer on, current consumption drops to some 7 mA. While the
+Pico2 is running to take the next measurement and to update the display, it draws 18 mA; this is already using
+a reduced clock of 50 MHz.
+
+I used the SingleFileDrive facility of LittleFS to export the logfile to the outside world. When pushing the button,
+logging starts, and in this mode, the device switches itself off and awakes every 5 seconds (still consuming the
+abovementioned 7 mA though). The restart process lets the display flicker shortly.
 
