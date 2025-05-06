@@ -84,21 +84,21 @@ of 40% in my room, here are the readings:
 
 | Sensor | humidity | temperature | 
 | -------|----------| ------------|
-|SHT45   | 40.09    | 21.51       |
-| BME680 |  48.15   | 22.02       |
-| HYT    |  37      | 21.9        |
-| real   |  ?       | 21.56       |
+|SHT45   | 39.58    | 21.58       |
+| BME680 |  47.23   | 22.24       |
+| HYT    |  36      | 21.8        |
+| real   |  ?       | 21.70       |
 
-Here, the HYT is in free air, so it should not suffer from the heating effect of its case. The SHT45 is the most 
-accurate temperature sensor.
+Here, the HYT is in free air, so it should not suffer from the heating effect of its case. Still, it takes long
+to equilibrium and consistently measures too hot. 
 Humidity cannot be trusted with the BME680, and when comparing the HYT and the SHT45, we see that they are 3% rF
-from each other. With a temperature reading different by 0.4 degree, which already translates into a bit more than
+from each other. With a temperature reading different by 0.3 degree, which already translates into a bit less than
 2% rF, the agreement is actually excellent.
 
-My conclusion is that the hygrometer of the HYT is good, but the thermometer - in my case at least - is off by some
-tenths of a degree, which leads to deviations of humidity around 2%, adding to the achievable accuracy of at best 1,5%.
-I think that the measurement of my HYT can be trusted within about 4% rF, and I can improve it a little by measuring 
-temperature exactly and taking that into account as correction factor.
+My conclusion is that the hygrometer of the HYT is good, but the thermometer - in my case at least - might be a bit
+higher estimated than reality, which leads to deviations of humidity around 1%, adding to the achievable accuracy of at best 1,5%.
+I think that the measurement of my HYT can be trusted within about 3-4% rF, and I can improve it a little by measuring 
+temperature exactly and taking that into account as correction factor (or just adding 1% rF as correction).
 
  
 at temperature 21,8 degree. 
