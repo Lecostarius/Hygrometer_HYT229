@@ -57,8 +57,8 @@ of the Pico2, which makes it difficult for me to fit above the battery. And, I p
 wall, where it fits snugly. But that means that the temperature sensor becomes slow - probably because it has
 now great thermal contact to the case, and therefore the entire case needs to warm up or cool down before the HYT
 will see the actual new temperature value. This is a big problem since the effect of temperature on measured
-moisture is very large: even an offset of as little as 0.5 degree might result in a moisture reading that is
-several percent off. It might be better to glue the HYT into a large hole with space around it, so that it keeps 
+moisture is very large: even an offset of as little as 0.5 degree will result in a moisture reading that is
+three percent off. It might be better to glue the HYT into a large hole with space around it, so that it keeps 
 most of its speed. Speed is not the only thing; my electronics eats a bit of power (20 mA at 4 V or 80 mW) which
 will cause some self-heating which will make the measured relative moisture lower than reality due to a higher than
 actual temperature reading.
@@ -76,6 +76,29 @@ a reduced clock of 50 MHz.
 I used the SingleFileDrive facility of LittleFS to export the logfile to the outside world. When pushing the button,
 logging starts, and in this mode, the device switches itself off and awakes every 5 seconds (still consuming the
 abovementioned 7 mA though). The restart process lets the display flicker shortly.
+
+I tried the accuracy of the device, with a wet cloth (which should achieve 100% rF), over a saturated NaCl solution
+(which will yield 70%) and against two other hygrometers, a very old BME680 and a brand-new SHT45. The result is that
+the 100% is never produced by the HYT, it stops at 94% or max 95%. The 70% are well reproduced. At typical humidity
+of 40% in my room, here are the readings:
+SHT45  40.09   21.51
+BME680  48.15  22.02
+HYT     37     21.9
+real    ?      21.56
+
+Here, the HYT is in free air, so it should not suffer from the heating effect of its case. The SHT45 is the most 
+accurate temperature sensor.
+Humidity cannot be trusted with the BME680, and when comparing the HYT and the SHT45, we see that they are 3% rF
+from each other. With a temperature reading different by 0.4 degree, which already translates into a bit more than
+2% rF, the agreement is actually excellent.
+
+My conclusion is that the hygrometer of the HYT is good, but the thermometer - in my case at least - is off by some
+tenths of a degree, which leads to deviations of humidity around 2%, adding to the achievable accuracy of at best 1,5%.
+I think that the measurement of my HYT can be trusted within about 4% rF, and I can improve it a little by measuring 
+temperature exactly and taking that into account as correction factor.
+
+ 
+at temperature 21,8 degree. 
 
 Note: the current code that uses powman and switches off the Pico 2 is in the branch sleep and not in main!
 
