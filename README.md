@@ -81,10 +81,13 @@ I tried the accuracy of the device, with a wet cloth (which should achieve 100% 
 (which will yield 70%) and against two other hygrometers, a very old BME680 and a brand-new SHT45. The result is that
 the 100% is never produced by the HYT, it stops at 94% or max 95%. The 70% are well reproduced. At typical humidity
 of 40% in my room, here are the readings:
-SHT45  40.09   21.51
-BME680  48.15  22.02
-HYT     37     21.9
-real    ?      21.56
+
+| Sensor | humidity | temperature | 
+| -------|----------| ------------|
+|SHT45   | 40.09    | 21.51       |
+| BME680 |  48.15   | 22.02       |
+| HYT    |  37      | 21.9        |
+| real   |  ?       | 21.56       |
 
 Here, the HYT is in free air, so it should not suffer from the heating effect of its case. The SHT45 is the most 
 accurate temperature sensor.
