@@ -56,8 +56,12 @@ After the first 3d prints, I found an issue with my layout: the Lipo Shim is add
 of the Pico2, which makes it difficult for me to fit above the battery. And, I put the HYT into a hole in the
 wall, where it fits snugly. But that means that the temperature sensor becomes slow - probably because it has
 now great thermal contact to the case, and therefore the entire case needs to warm up or cool down before the HYT
-will see the actual new temperature value. It might be better to glue the HYT into a large hole with space around
-it, so that it keeps most of its speed.
+will see the actual new temperature value. This is a big problem since the effect of temperature on measured
+moisture is very large: even an offset of as little as 0.5 degree might result in a moisture reading that is
+several percent off. It might be better to glue the HYT into a large hole with space around it, so that it keeps 
+most of its speed. Speed is not the only thing; my electronics eats a bit of power (20 mA at 4 V or 80 mW) which
+will cause some self-heating which will make the measured relative moisture lower than reality due to a higher than
+actual temperature reading.
 
 The Lipo Shim has a white LED that is always on when the device is on. With my 3d printed PLA, I can see that LED
 from the outside, which looks weird. Either I remove the LED, or print with 100 percent material so that this light
